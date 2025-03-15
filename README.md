@@ -33,7 +33,7 @@ A decentralized application (dApp) for tokenizing real-world assets using blockc
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/asset-tokenization-dashboard.git
+git clone https://github.com/venkatriteesh/asset-tokenization-dashboard.git
 cd asset-tokenization-dashboard
 ```
 
@@ -85,5 +85,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-Your Name - your.email@example.com
-Project Link: https://github.com/your-username/asset-tokenization-dashboard
+Venkat Riteesh
+Project Link: https://github.com/venkatriteesh/asset-tokenization-dashboard
