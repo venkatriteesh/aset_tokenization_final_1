@@ -1,8 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
-import { CoinbaseWallet } from "@web3-react/coinbase-wallet";
 import {
   Home,
   Plus,
@@ -12,31 +10,45 @@ import {
   Shield,
   CreditCard,
 } from "lucide-react";
+import { IPFSTest } from './components/IPFSTest';
+import { AssetRegistrationForm } from './components/AssetRegistrationForm';
+import { contractHelper } from './utils/contractHelper';
 
-// Wallet connection configurations
-const walletConnect = new WalletConnectConnector({
-  rpc: { 1: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID" }, // Replace with your Infura ID
-  bridge: "https://bridge.walletconnect.org",
-  qrcode: true,
-});
-
-const coinbaseWallet = new CoinbaseWallet({
-  appName: "Asset Tokenization Dashboard",
-  url: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID", // Replace with your Infura ID
-});
-
-// Check available Ethereum providers
-const getEthereumProvider = () => {
-  if (typeof window !== "undefined") {
-    if (window.ethereum?.isMetaMask) return { provider: window.ethereum, type: "metamask" };
-    if (window.ethereum?.isCoinbaseWallet) return { provider: window.ethereum, type: "coinbase" };
-    return null;
-  }
-  return null;
+// Types
+type WalletType = "metamask" | null;
+type EthereumProvider = {
+  provider: any;
+  type: WalletType;
 };
 
+interface ButtonProps {
+  variant: "default" | "outline" | "ghost";
+  className: string;
+  children: ReactNode;
+  onClick?: () => void;
+  type?: "button" | "submit";
+  disabled?: boolean;
+}
+
+interface CardProps {
+  children: ReactNode;
+  className?: string;
+}
+
+interface AssetRegistrationFormProps {
+  signer: ethers.JsonRpcSigner | null;
+}
+
+interface OwnershipVerificationProps {
+  signer: ethers.JsonRpcSigner | null;
+}
+
+interface EscrowPaymentsProps {
+  signer: ethers.JsonRpcSigner | null;
+}
+
 // Reusable Button Component
-const Button = ({ variant, className, children, ...props }) => (
+const Button = ({ variant, className, children, ...props }: ButtonProps) => (
   <motion.button
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
@@ -52,7 +64,7 @@ const Button = ({ variant, className, children, ...props }) => (
 );
 
 // Reusable Card Component
-const Card = ({ children, className }) => (
+const Card = ({ children, className = "" }: CardProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -62,75 +74,17 @@ const Card = ({ children, className }) => (
   </motion.div>
 );
 
-// Asset Registration Form
-const AssetRegistrationForm = ({ signer }) => {
-  const [assetDetails, setAssetDetails] = useState({
-    name: "",
-    description: "",
-    type: "property",
-    governmentId: "",
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    alert("Asset registered successfully!");
-    console.log("Asset Details:", assetDetails);
-  };
-
-  return (
-    <Card className="p-6">
-      <h2 className="text-xl font-bold mb-4">Register Asset</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Asset Name"
-          value={assetDetails.name}
-          onChange={(e) =>
-            setAssetDetails({ ...assetDetails, name: e.target.value })
-          }
-          className="w-full p-2 border border-gray-300 rounded-lg"
-          required
-        />
-        <textarea
-          placeholder="Asset Description"
-          value={assetDetails.description}
-          onChange={(e) =>
-            setAssetDetails({ ...assetDetails, description: e.target.value })
-          }
-          className="w-full p-2 border border-gray-300 rounded-lg"
-          required
-        />
-        <select
-          value={assetDetails.type}
-          onChange={(e) =>
-            setAssetDetails({ ...assetDetails, type: e.target.value })
-          }
-          className="w-full p-2 border border-gray-300 rounded-lg"
-          required
-        >
-          <option value="property">Property</option>
-          <option value="vehicle">Vehicle</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Government ID"
-          value={assetDetails.governmentId}
-          onChange={(e) =>
-            setAssetDetails({ ...assetDetails, governmentId: e.target.value })
-          }
-          className="w-full p-2 border border-gray-300 rounded-lg"
-          required
-        />
-        <Button type="submit" variant="default">
-          Register Asset
-        </Button>
-      </form>
-    </Card>
-  );
+// Check available Ethereum providers
+const getEthereumProvider = () => {
+  if (typeof window !== "undefined") {
+    if (window.ethereum?.isMetaMask) return { provider: window.ethereum, type: "metamask" };
+    return null;
+  }
+  return null;
 };
 
 // Ownership Verification
-const OwnershipVerification = ({ signer }) => {
+const OwnershipVerification = ({ signer }: OwnershipVerificationProps) => {
   const [verificationResult, setVerificationResult] = useState("");
 
   const verifyOwnership = async () => {
@@ -140,7 +94,7 @@ const OwnershipVerification = ({ signer }) => {
   return (
     <Card className="p-6">
       <h2 className="text-xl font-bold mb-4">Ownership Verification</h2>
-      <Button variant="default" onClick={verifyOwnership}>
+      <Button variant="default" className="w-full" onClick={verifyOwnership}>
         Verify Ownership
       </Button>
       {verificationResult && (
@@ -151,13 +105,13 @@ const OwnershipVerification = ({ signer }) => {
 };
 
 // Escrow & Payments
-const EscrowPayments = ({ signer }) => {
+const EscrowPayments = ({ signer }: EscrowPaymentsProps) => {
   const [escrowDetails, setEscrowDetails] = useState({
     amount: "",
     recipient: "",
   });
 
-  const handleEscrowSubmit = async (e) => {
+  const handleEscrowSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     alert("Escrow created successfully!");
     console.log("Escrow Details:", escrowDetails);
@@ -187,7 +141,7 @@ const EscrowPayments = ({ signer }) => {
           className="w-full p-2 border border-gray-300 rounded-lg"
           required
         />
-        <Button type="submit" variant="default">
+        <Button type="submit" variant="default" className="w-full">
           Create Escrow
         </Button>
       </form>
@@ -196,90 +150,51 @@ const EscrowPayments = ({ signer }) => {
 };
 
 // Main Dashboard Component
-export default function AssetTokenizationDashboard() {
+export const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("assets");
-  const [walletAddress, setWalletAddress] = useState("");
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [walletType, setWalletType] = useState(null);
+  const [walletAddress, setWalletAddress] = useState<string>("");
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
-  // Connect to specific wallet
-  const connectWallet = useCallback(async (type) => {
+  // Connect wallet
+  const connectWallet = async () => {
     try {
       setIsConnecting(true);
-      let web3Provider, signerInstance, address;
+      setConnectionError(null);
 
-      switch (type) {
-        case "metamask": {
-          const ethProvider = getEthereumProvider();
-          if (!ethProvider || !ethProvider.provider.isMetaMask) {
-            throw new Error("MetaMask not detected");
-          }
-          const accounts = await ethProvider.provider.request({
-            method: "eth_requestAccounts",
-          });
-          web3Provider = new ethers.BrowserProvider(ethProvider.provider);
-          signerInstance = await web3Provider.getSigner();
-          address = accounts[0];
-          break;
-        }
-        case "coinbase": {
-          const ethProvider = getEthereumProvider();
-          if (!ethProvider || !ethProvider.provider.isCoinbaseWallet) {
-            await coinbaseWallet.activate();
-            web3Provider = new ethers.BrowserProvider(coinbaseWallet.provider);
-            signerInstance = await web3Provider.getSigner();
-            address = await signerInstance.getAddress();
-          } else {
-            const accounts = await ethProvider.provider.request({
-              method: "eth_requestAccounts",
-            });
-            web3Provider = new ethers.BrowserProvider(ethProvider.provider);
-            signerInstance = await web3Provider.getSigner();
-            address = accounts[0];
-          }
-          break;
-        }
-        case "walletconnect": {
-          await walletConnect.activate();
-          web3Provider = new ethers.BrowserProvider(walletConnect.provider);
-          signerInstance = await web3Provider.getSigner();
-          address = await signerInstance.getAddress();
-          break;
-        }
-        default:
-          throw new Error("Unsupported wallet type");
+      const ethProvider = getEthereumProvider();
+      if (!ethProvider || !ethProvider.provider.isMetaMask) {
+        throw new Error("MetaMask not detected");
       }
 
+      const accounts = await ethProvider.provider.request({
+        method: "eth_requestAccounts",
+      });
+
+      const web3Provider = new ethers.BrowserProvider(ethProvider.provider);
+      const signerInstance = await web3Provider.getSigner();
+      
       setProvider(web3Provider);
       setSigner(signerInstance);
-      setWalletAddress(address);
-      setWalletType(type);
+      setWalletAddress(accounts[0]);
     } catch (error) {
-      console.error(`Failed to connect ${type} wallet:`, error);
-      alert(`Failed to connect ${type} wallet: ${error.message}`);
+      console.error('Failed to connect wallet:', error);
+      setConnectionError(
+        error instanceof Error ? error.message : 'Failed to connect wallet'
+      );
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  };
 
   // Disconnect wallet
-  const disconnectWallet = useCallback(async () => {
-    try {
-      if (walletType === "walletconnect") {
-        await walletConnect.deactivate();
-      } else if (walletType === "coinbase" && !window.ethereum?.isCoinbaseWallet) {
-        await coinbaseWallet.deactivate();
-      }
-      setProvider(null);
-      setSigner(null);
-      setWalletAddress("");
-      setWalletType(null);
-    } catch (error) {
-      console.error("Disconnect error:", error);
-    }
-  }, [walletType]);
+  const disconnectWallet = async () => {
+    setProvider(null);
+    setSigner(null);
+    setWalletAddress("");
+  };
 
   // Check existing connection on mount
   useEffect(() => {
@@ -294,7 +209,6 @@ export default function AssetTokenizationDashboard() {
             setProvider(web3Provider);
             setSigner(signerInstance);
             setWalletAddress(accounts[0]);
-            setWalletType(ethProvider.type);
           }
         } catch (error) {
           console.error("Check connection error:", error);
@@ -309,7 +223,7 @@ export default function AssetTokenizationDashboard() {
     const ethProvider = getEthereumProvider();
     if (!ethProvider?.provider) return;
 
-    const handleAccountsChanged = async (accounts) => {
+    const handleAccountsChanged = async (accounts: string[]) => {
       if (accounts.length === 0) {
         await disconnectWallet();
       } else {
@@ -325,7 +239,7 @@ export default function AssetTokenizationDashboard() {
     return () => {
       ethProvider.provider.removeListener("accountsChanged", handleAccountsChanged);
     };
-  }, [disconnectWallet]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
@@ -359,35 +273,15 @@ export default function AssetTokenizationDashboard() {
                 </Button>
               </>
             ) : (
-              <div className="flex space-x-2">
-                <Button
-                  variant="default"
-                  className="rounded-full px-6 space-x-2"
-                  onClick={() => connectWallet("metamask")}
-                  disabled={isConnecting}
-                >
-                  <Wallet className="w-4 h-4" />
-                  <span>MetaMask</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-full px-6 space-x-2"
-                  onClick={() => connectWallet("coinbase")}
-                  disabled={isConnecting}
-                >
-                  <Wallet className="w-4 h-4" />
-                  <span>Coinbase</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-full px-6 space-x-2"
-                  onClick={() => connectWallet("walletconnect")}
-                  disabled={isConnecting}
-                >
-                  <Wallet className="w-4 h-4" />
-                  <span>WalletConnect</span>
-                </Button>
-              </div>
+              <Button
+                variant="default"
+                className="rounded-full px-6 space-x-2"
+                onClick={connectWallet}
+                disabled={isConnecting}
+              >
+                <Wallet className="w-4 h-4" />
+                <span>{isConnecting ? 'Connecting...' : 'Connect MetaMask'}</span>
+              </Button>
             )}
           </div>
         </div>
@@ -421,6 +315,8 @@ export default function AssetTokenizationDashboard() {
         </Card>
 
         <div className="col-span-3">
+          <IPFSTest />
+          
           {activeTab === "mint" && <AssetRegistrationForm signer={signer} />}
           {activeTab === "verify" && <OwnershipVerification signer={signer} />}
           {activeTab === "escrow" && <EscrowPayments signer={signer} />}
@@ -446,4 +342,4 @@ export default function AssetTokenizationDashboard() {
       </div>
     </div>
   );
-}
+};

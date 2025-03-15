@@ -1,11 +1,10 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
-import { CONTRACT_ABI, CONTRACT_ADDRESS } from "./contracts";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { Dashboard } from './Dashboard'
+import './index.css'
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+    <Dashboard />
+  </React.StrictMode>,
+)
