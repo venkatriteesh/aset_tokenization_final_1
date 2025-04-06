@@ -1,0 +1,35 @@
+[
+  {
+    "name": "escrows",
+    "inputs": [{ "name": "arg0", "type": "uint256" }],
+    "outputs": [
+      { "name": "sender", "type": "address" },
+      { "name": "recipient", "type": "address" },
+      { "name": "amount", "type": "uint256" },
+      { "name": "released", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "name": "escrowCount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "name": "createEscrow",
+    "inputs": [{ "name": "recipient", "type": "address" }],
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "name": "release",
+    "inputs": [{ "name": "escrowId", "type": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

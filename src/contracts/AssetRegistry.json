@@ -1,0 +1,52 @@
+[
+  {
+    "type": "event",
+    "name": "AssetRegistered",
+    "inputs": [
+      { "name": "assetId", "type": "uint256", "indexed": true },
+      { "name": "owner", "type": "address", "indexed": true },
+      { "name": "name", "type": "string", "indexed": false }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "function",
+    "name": "registerAsset",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "name", "type": "string" },
+      { "name": "description", "type": "string" },
+      { "name": "assetType", "type": "string" },
+      { "name": "governmentId", "type": "string" },
+      { "name": "cid", "type": "string" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "assetCount",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "assets",
+    "stateMutability": "view",
+    "inputs": [{ "name": "arg0", "type": "uint256" }],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "components": [
+          { "name": "name", "type": "string" },
+          { "name": "description", "type": "string" },
+          { "name": "assetType", "type": "string" },
+          { "name": "governmentId", "type": "string" },
+          { "name": "cid", "type": "string" },
+          { "name": "owner", "type": "address" }
+        ]
+      }
+    ]
+  }
+]

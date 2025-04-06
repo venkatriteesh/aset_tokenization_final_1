@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Transfer",
+    "inputs": [
+      { "name": "sender", "type": "address", "indexed": true },
+      { "name": "receiver", "type": "address", "indexed": true },
+      { "name": "tokenId", "type": "uint256", "indexed": true }
+    ],
+    "anonymous": false,
+    "type": "event"
+  },
+  {
+    "name": "owner_of",
+    "inputs": [{ "name": "arg0", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "name": "balances",
+    "inputs": [{ "name": "arg0", "type": "address" }],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "name": "mint",
+    "inputs": [
+      { "name": "to", "type": "address" },
+      { "name": "tokenId", "type": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "name": "transferFrom",
+    "inputs": [
+      { "name": "_from", "type": "address" },
+      { "name": "to", "type": "address" },
+      { "name": "tokenId", "type": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
