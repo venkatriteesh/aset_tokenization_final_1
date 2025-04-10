@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { uploadToIPFS, uploadMetadataToIPFS } from '../utils/ipfs';
-import { contractHelper } from '../utils/contractHelper';
+import { contractHelper } from '../utils/contractHelper.js';
 
 interface AssetRegistrationFormProps {
   signer: ethers.JsonRpcSigner | null;
@@ -50,7 +50,8 @@ export const AssetRegistrationForm = ({ signer }: AssetRegistrationFormProps) =>
 
     try {
       // Initialize contract
-      await contractHelper.initialize(signer);
+      // Initialize contracts if needed
+      // await contractHelper.initialize(signer);
 
       // Upload image to IPFS
       const imageHash = await uploadToIPFS(selectedFile);
@@ -79,12 +80,19 @@ export const AssetRegistrationForm = ({ signer }: AssetRegistrationFormProps) =>
       setStatus({ message: 'Minting NFT...', type: 'info' });
       
       // Mint NFT
+      const contracts = {
+        AssetNFT: {
+          address: contractHelper.getContractAddress('AssetNFT', 31337), // Using localhost network
+          abi: require('../contracts/AssetNFT.json').abi
+        }
+      };
+
       const result = await contractHelper.mintAsset(
-        assetDetails.name,
-        assetDetails.description,
-        assetDetails.assetType,
-        assetDetails.governmentId,
-        metadataHash
+        signer,
+        contracts.AssetNFT.address,
+        contracts.AssetNFT.abi,
+        assetDetails.name, // Using name as assetId
+        metadataHash.cid
       );
 
       setStatus({
